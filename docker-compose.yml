@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:latest
+    volumes:
+     - data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: "avito_test_case"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "laputanmachine"
+    ports:
+      - "8001:5432"
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      TC_PG_HOST: "db"
+      TC_OG_USER: "postgres"
+      TC_PG_PASSWORD: "laputanmachine"
+    depends_on:
+      - db
+      #command:
+      # - "DB_HOST $${DB_HOST}"
+    #  ports:
+    #   - "3000:3000"
+
+
+volumes:
+  data:

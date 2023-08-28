@@ -1,0 +1,19 @@
+app:
+  name : 'solution_saltykov'
+
+http:
+  port : '8080'
+
+log:
+  level : 'debug'
+
+postgres:
+  host : 'localhost'
+  port : '5432'
+  user : 'database'
+  password : 'laputanmachine'
+  db : 'avito_test_case'
+  poolMaxOpen : '10'
+  poolMaxIdle : '10'
+  poolMaxLifeTime : '300'
+  reconnectAttempts : '3'
