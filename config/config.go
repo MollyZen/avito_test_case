@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
-	"log"
 	"os"
 )
 
@@ -34,14 +33,15 @@ type (
 	// Postgres -.
 	Postgres struct {
 		Host              string `yaml:"host" env:"TC_PG_HOST" env-default:"localhost" validate:"required"`
-		Port              int    `yaml:"port" env:"TC_PG_PORT" env-default:"5432" validate:"required"`
+		Port              int32  `yaml:"port" env:"TC_PG_PORT" env-default:"5432" validate:"required"`
 		User              string `yaml:"user" env:"TC_PG_USER" env-default:"postgres" validate:"required"`
 		Password          string `yaml:"password" env:"TC_PG_PASSWORD" env-default:"postgres" validate:"required"`
 		DB                string `yaml:"db" env:"TC_PG_DB" env-default:"avito_test_case" validate:"required"`
-		PoolMaxOpen       int    `yaml:"poolMaxOpen" env:"TC_PG_POOL_MAX_OPEN" env-default:"10" validate:"required"`
-		PoolMaxIdle       int    `yaml:"poolMaxIdle" env:"TC_PG_POOL_MAX_IDLE" env-default:"10" validate:"required"`
-		PoolMaxLifetime   int    `yaml:"poolMaxLifetime" env:"TC_PG_POOL_MAX_LIFETIME" env-default:"3" validate:"required"`
-		ReconnectAttempts int    `yaml:"ReconnectAttempts" env:"TC_PG_RECONNECT_ATTEMPTS" env-default:"3" validate:"required"`
+		PoolMaxOpen       int32  `yaml:"poolMaxOpen" env:"TC_PG_POOL_MAX_OPEN" env-default:"10" validate:"required"`
+		PoolMaxIdle       int32  `yaml:"poolMaxIdle" env:"TC_PG_POOL_MAX_IDLE" env-default:"10" validate:"required"`
+		PoolMaxLifetime   int32  `yaml:"poolMaxLifetime" env:"TC_PG_POOL_MAX_LIFETIME" env-default:"3" validate:"required"`
+		ReconnectAttempts int32  `yaml:"reconnectAttempts" env:"TC_PG_RECONNECT_ATTEMPTS"`
+		LogLevel          string `yaml:"logLevel" env:"TC_PG_LOG_LEVEL" env-default:"NONE" validate:"required"`
 	}
 )
 
@@ -57,8 +57,6 @@ func New() (*Config, error) {
 			return nil, err
 		}
 	}
-
-	log.Print(cfg)
 
 	if err := validator.New().Struct(cfg); err != nil {
 		return nil, err
