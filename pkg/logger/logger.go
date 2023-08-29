@@ -11,15 +11,15 @@ import (
 // Logger -.
 type Logger interface {
 	Debug(message interface{}, args ...interface{})
-	Info(message string, args ...interface{})
-	Warn(message string, args ...interface{})
+	Info(message interface{}, args ...interface{})
+	Warn(message interface{}, args ...interface{})
 	Error(message interface{}, args ...interface{})
 	Fatal(message interface{}, args ...interface{})
 }
 
 // ZeroLogLogger -.
 type ZeroLogLogger struct {
-	logger *zerolog.Logger
+	L *zerolog.Logger
 }
 
 // New -.
@@ -58,11 +58,11 @@ func NewZeroLog(level string) Logger {
 	}
 
 	return &ZeroLogLogger{
-		logger: &logger,
+		L: &logger,
 	}
 }
 
-func (l *ZeroLogLogger) formatMessage(message any) string {
+func (l *ZeroLogLogger) formatMessage(message interface{}) string {
 	switch t := message.(type) {
 	case error:
 		return t.Error()
@@ -74,41 +74,41 @@ func (l *ZeroLogLogger) formatMessage(message any) string {
 }
 
 // Debug -.
-func (l *ZeroLogLogger) Debug(message any, args ...any) {
+func (l *ZeroLogLogger) Debug(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
-	l.log(l.logger.Debug(), mf, args...)
+	l.log(l.L.Debug(), mf, args...)
 }
 
 // Info -.
-func (l *ZeroLogLogger) Info(message string, args ...any) {
+func (l *ZeroLogLogger) Info(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
-	l.log(l.logger.Info(), mf, args...)
+	l.log(l.L.Info(), mf, args...)
 }
 
 // Warn -.
-func (l *ZeroLogLogger) Warn(message string, args ...any) {
+func (l *ZeroLogLogger) Warn(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
-	l.log(l.logger.Warn(), mf, args...)
+	l.log(l.L.Warn(), mf, args...)
 }
 
 // Error -.
-func (l *ZeroLogLogger) Error(message interface{}, args ...any) {
+func (l *ZeroLogLogger) Error(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
-	l.log(l.logger.Error(), mf, args...)
+	l.log(l.L.Error(), mf, args...)
 }
 
 // Fatal -.
-func (l *ZeroLogLogger) Fatal(message interface{}, args ...any) {
+func (l *ZeroLogLogger) Fatal(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
-	l.log(l.logger.Fatal(), mf, args...)
+	l.log(l.L.Fatal(), mf, args...)
 
 	os.Exit(1)
 }
 
-func (l *ZeroLogLogger) log(e *zerolog.Event, m string, args ...any) {
+func (l *ZeroLogLogger) log(e *zerolog.Event, m string, args ...interface{}) {
 	if len(args) == 0 {
 		e.Msg(m)
 	} else {
-		e.Msgf(m, args)
+		e.Msgf(m, args...)
 	}
 }
