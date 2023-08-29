@@ -2,40 +2,55 @@ package database
 
 import (
 	"avito_test_case/config"
-	"database/sql"
+	"avito_test_case/pkg/logger"
+	"context"
 	"fmt"
-	_ "github.com/lib/pq"
-	"log"
+	"github.com/jackc/pgx-zerolog"
+	_ "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
+	"strings"
 	"time"
 )
 
-func NewPostgres(cfg config.Postgres) *sql.DB {
+func NewPostgres(cfg config.Postgres, l logger.Logger) *pgxpool.Pool {
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DB)
 
-	var db *sql.DB
+	var db *pgxpool.Pool
+	var poolCfg *pgxpool.Config
 	var err error
-	db, err = sql.Open("postgres", connStr)
+	poolCfg, err = pgxpool.ParseConfig(connStr)
+	poolCfg.MaxConns = cfg.PoolMaxOpen
+	poolCfg.MinConns = cfg.PoolMaxIdle
+	poolCfg.MaxConnLifetime = time.Second * time.Duration(cfg.PoolMaxLifetime)
+	switch v := l.(type) {
+	case *logger.ZeroLogLogger:
+		dbLogLevel, parseErr := tracelog.LogLevelFromString(strings.ToLower(cfg.LogLevel))
+		if parseErr != nil {
+			l.Fatal("Couldn't parse log level for Postgres", err)
+		}
+		poolCfg.ConnConfig.Tracer = &tracelog.TraceLog{
+			Logger:   zerolog.NewLogger(*v.L),
+			LogLevel: dbLogLevel,
+		}
+	}
 
+	db, err = pgxpool.NewWithConfig(context.TODO(), poolCfg)
+	err = db.Ping(context.TODO())
 	if err != nil {
 		att := cfg.ReconnectAttempts
+		l.Warn("Couldn't connect to Postgres DB")
 		for att > 0 && err != nil {
-			db, err = sql.Open("postgres", connStr)
-			log.Print("Attempting reconnect...")
+			l.Warn("Attempting Postgres reconnect...")
+			db, err = pgxpool.NewWithConfig(context.TODO(), poolCfg)
+			err = db.Ping(context.TODO())
 			att--
 		}
 		if err != nil {
-			panic(err)
+			l.Fatal("Couldn't connect to Postgres after %d %s %s. Error: ", cfg.ReconnectAttempts, "attempts", err)
 		}
 	}
-
-	if err = db.Ping(); err != nil {
-		panic(err)
-	}
-
-	db.SetConnMaxLifetime(time.Second * time.Duration(cfg.PoolMaxLifetime))
-	db.SetMaxOpenConns(cfg.PoolMaxOpen)
-	db.SetMaxIdleConns(cfg.PoolMaxIdle)
 
 	return db
 }

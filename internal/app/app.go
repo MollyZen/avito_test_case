@@ -14,13 +14,13 @@ import (
 
 func Run(cfg *config.Config) {
 	l := logger.NewZeroLog(cfg.Log.Level)
-	db := database.NewPostgres(cfg.Postgres)
-	segRep := repository.NewDatabaseSegmentRepository(db, &l)
+	db := database.NewPostgres(cfg.Postgres, l)
+	segRep := repository.NewPostgresSegmentRepository(db, l)
 	_, err := segRep.Create(context.TODO(), datastruct.Segment{
 		Name: "TEST_SEG",
 	})
 	if err != nil {
-		l.Fatal("Error adding new segment: ", err)
+		l.Error("Error adding new segment: %s", err)
 	}
 
 	// Waiting signal
