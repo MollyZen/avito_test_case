@@ -1,7 +1,7 @@
 package dto
 
 type UserSegmentChange struct {
-	UserID        int64    `json:"user-id"`
-	SegmentAdd    []string `json:"segment-add"`
-	SegmentRemove []string `json:"segment-remove"`
+	UserID        int64          `json:"userID"`
+	SegmentAdd    []SegmentToAdd `json:"segmentAdd"`
+	SegmentRemove []string       `json:"segmentRemove"`
 }
