@@ -6,7 +6,8 @@ import (
 )
 
 type AssignmentRepository interface {
-	Assign(ctx context.Context, userID int64, segments []datastruct.Segment)
-	Remove(ctx context.Context, userID int64, segments []datastruct.Segment)
-	GetAllForUser(ctx context.Context, userID int64) ([]datastruct.Segment, error)
+	Create(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error)
+	Update(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error)
+	Delete(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error)
+	GetAllForUser(ctx context.Context, userID int64) ([]datastruct.Assignment, error)
 }

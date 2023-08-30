@@ -6,5 +6,6 @@ import (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user datastruct.User)
+	Create(ctx context.Context, user datastruct.User) (datastruct.User, error)
+	Upsert(ctx context.Context, user datastruct.User) (datastruct.User, error)
 }

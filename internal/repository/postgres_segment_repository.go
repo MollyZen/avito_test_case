@@ -37,6 +37,20 @@ func (p PostgresSegmentRepository) Create(ctx context.Context, segment datastruc
 	return res, nil
 }
 
+func (p PostgresSegmentRepository) GetForIds(ctx context.Context, slugs []string) ([]datastruct.Segment, error) {
+	q := `
+		SELECT * FROM segmenting.segment
+		WHERE (name) = ANY(UNNEST($1::varchar[]))
+		`
+	var res []datastruct.Segment
+	if err := pgxscan.Select(ctx, p.db, &res, q, slugs); err != nil {
+		p.log.Error(err)
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (p PostgresSegmentRepository) DeleteById(ctx context.Context, segmentId int64) {
 	//TODO implement me
 	panic("implement me")
