@@ -11,6 +11,7 @@ import (
 	"avito_test_case/pkg/logger"
 	"fmt"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -37,9 +38,9 @@ func Run(cfg *config.Config) {
 	v1.NewAssignmentController(mux, asService, l)
 	v1.NewUserController(mux, asService, l)
 	mux.Mount("/swagger", httpSwagger.Handler(httpSwagger.URL("/swagger/doc.json")))
-	/*mux.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
+	mux.Get("/swagger", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/swagger/", http.StatusMovedPermanently)
-	})*/
+	})
 	httpServer := httpserver.New(mux, cfg.HTTP)
 
 	// Waiting signal
