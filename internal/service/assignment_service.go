@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
@@ -122,14 +123,24 @@ func (uc PostgresAssignmentService) Assign(ctx context.Context, userID int64, se
 			toUpdate = append(toUpdate, datastruct.Assignment{
 				UserID:    user.ID,
 				SegmentID: v.ID,
-				UntilDate: segToAdd[i].UntilDate,
 			})
+			if len(segToAdd[i].UntilDate) != 0 {
+				var tmp time.Time
+				tmp, err = time.Parse(time.RFC3339, segToAdd[i].UntilDate)
+				toUpdate[len(toUpdate)-1].UntilDate =
+					pgtype.Timestamptz{Time: tmp}
+			}
 		} else {
 			toAdd = append(toAdd, datastruct.Assignment{
 				UserID:    user.ID,
 				SegmentID: v.ID,
-				UntilDate: segToAdd[i].UntilDate,
 			})
+			if len(segToAdd[i].UntilDate) != 0 {
+				var tmp time.Time
+				tmp, err = time.Parse(time.RFC3339, segToAdd[i].UntilDate)
+				toAdd[len(toAdd)-1].UntilDate =
+					pgtype.Timestamptz{Time: tmp}
+			}
 		}
 	}
 
@@ -201,7 +212,9 @@ func (uc PostgresAssignmentService) GetUserAssignments(ctx context.Context, user
 	segRes := make([]dto.SegmentToAdd, len(as))
 	for i, v := range as {
 		segRes[i].Slug = segSlugMap[v.SegmentID]
-		segRes[i].UntilDate = v.UntilDate
+		if v.UntilDate.Valid {
+			segRes[i].UntilDate = v.UntilDate.Time.Format(time.RFC3339)
+		}
 	}
 	res.SegmentAdded = segRes
 

@@ -1,0 +1,331 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API Server for User Segmentation",
+        "title": "Denis Saltykov's Solution",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/assignment": {
+            "put": {
+                "description": "Remove and/or add segments to user. Deletes happen first. In case of conflict with existing data new values overwrite old ones",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assignment"
+                ],
+                "summary": "ChangeAssignment",
+                "operationId": "change-assignment",
+                "parameters": [
+                    {
+                        "description": "User ID, slugs of segments to add (TTL is optional) and delete. DateTime in RFC3339 format",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.UserSegmentChange"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/segment": {
+            "put": {
+                "description": "Creates new segment. If it already exists - sets active state to true",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "segment"
+                ],
+                "summary": "CreateNewSegment",
+                "operationId": "create-segment",
+                "parameters": [
+                    {
+                        "description": "Segment slug with percent of people to assign this segment to",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.Segment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deletes a segment. All existing assignments with this segment will be deleted with it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "segment"
+                ],
+                "summary": "DeleteSegment",
+                "operationId": "delete-segment",
+                "parameters": [
+                    {
+                        "description": "Segment slug",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.SegmentToDelete"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "description": "Returns current assignments of user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "GetAssignments",
+                "operationId": "get-assignments",
+                "parameters": [
+                    {
+                        "description": "User ID",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.UserSegmentGet"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/history": {
+            "get": {
+                "description": "Returns all assignment action history for this user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "GetHistory",
+                "operationId": "get-history",
+                "parameters": [
+                    {
+                        "description": "User ID with year and month to get history of",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.UserHistoryGet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.UserHistory"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "avito_test_case_internal_dto.Segment": {
+            "type": "object",
+            "required": [
+                "slug"
+            ],
+            "properties": {
+                "percent": {
+                    "type": "number",
+                    "maximum": 100,
+                    "minimum": 0
+                },
+                "slug": {
+                    "type": "string",
+                    "minLength": 4
+                },
+                "untilDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.SegmentToAdd": {
+            "type": "object",
+            "required": [
+                "slug"
+            ],
+            "properties": {
+                "slug": {
+                    "type": "string",
+                    "minLength": 4
+                },
+                "untilDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.SegmentToDelete": {
+            "type": "object",
+            "required": [
+                "slug"
+            ],
+            "properties": {
+                "slug": {
+                    "type": "string",
+                    "minLength": 4
+                }
+            }
+        },
+        "avito_test_case_internal_dto.User": {
+            "type": "object",
+            "required": [
+                "userID"
+            ],
+            "properties": {
+                "userID": {
+                    "type": "string",
+                    "minimum": 0,
+                    "example": "0"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.UserHistory": {
+            "type": "object",
+            "properties": {
+                "records": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/avito_test_case_internal_dto.UserHistoryRecord"
+                    }
+                }
+            }
+        },
+        "avito_test_case_internal_dto.UserHistoryGet": {
+            "type": "object",
+            "required": [
+                "month",
+                "userID",
+                "year"
+            ],
+            "properties": {
+                "month": {
+                    "type": "string",
+                    "maximum": 12,
+                    "minimum": 1,
+                    "example": "0"
+                },
+                "userID": {
+                    "type": "string",
+                    "minimum": 0,
+                    "example": "0"
+                },
+                "year": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.UserHistoryRecord": {
+            "type": "object",
+            "properties": {
+                "operation": {
+                    "type": "string"
+                },
+                "segment": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": ""
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.UserSegmentChange": {
+            "type": "object",
+            "required": [
+                "userID"
+            ],
+            "properties": {
+                "segmentAdd": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/avito_test_case_internal_dto.SegmentToAdd"
+                    }
+                },
+                "segmentRemove": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userID": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "avito_test_case_internal_dto.UserSegmentGet": {
+            "type": "object",
+            "properties": {
+                "segmentAdd": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/avito_test_case_internal_dto.SegmentToAdd"
+                    }
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

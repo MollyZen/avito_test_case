@@ -43,7 +43,8 @@ INSERT INTO segmenting.operation (id, name, description, creationdate, updatedat
            (1, 'REMOVED', 'Удаление', now(), now(), TRUE),
            (2, 'EXPIRED', 'Удаление по истечении времени', now(), now(), TRUE),
            (3, 'UPDATED', 'Обновление значения', now(), now(), TRUE),
-           (4, 'SEGMENT_DELETED', 'Удален вместе с сегментом', now(), now(), TRUE);
+           (4, 'SEGMENT_DELETED', 'Удален вместе с сегментом', now(), now(), TRUE),
+           (5, 'ADDED_RAND', 'Добавлен случайным образом при создании сегмента', now(), now(), TRUE);
 
 CREATE TABLE segmenting.history (
     id BIGSERIAL PRIMARY KEY,

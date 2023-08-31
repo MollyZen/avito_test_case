@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -131,4 +132,29 @@ func (p PostgresSegmentRepository) DeleteBySlug(ctx context.Context, segmentSlug
 		return datastruct.Segment{}, err
 	}
 	return p.DeleteBySlugWithConn(ctx, segmentSlug, conn.Conn())
+}
+
+func (p PostgresSegmentRepository) AddToPercentOfUsersWithConn(ctx context.Context, segmentID int64, percent float64, untilDate pgtype.Timestamptz, conn *pgx.Conn) ([]datastruct.Assignment, error) {
+	q := `
+		WITH users AS (SELECT id FROM segmenting.user TABLESAMPLE BERNOULLI($1)),
+		segs AS (SELECT $2::bigint AS segmentid, $3::timestamptz AS untildate),
+		ljoin AS (SELECT u.id AS userid, s.segmentid, s.untildate FROM users u LEFT JOIN segs s on TRUE)
+		INSERT INTO segmenting.assignment
+		SELECT userid, segmentid, untildate FROM ljoin
+		RETURNING userid
+	`
+	var res []datastruct.Assignment
+	if err := pgxscan.Select(ctx, conn, &res, q, percent, segmentID, untilDate); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (p PostgresSegmentRepository) AddToPercentOfUsers(ctx context.Context, segmentID int64, percent float64, untilDate pgtype.Timestamptz) ([]datastruct.Assignment, error) {
+	conn, err := p.db.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return p.AddToPercentOfUsersWithConn(ctx, segmentID, percent, untilDate, conn.Conn())
 }

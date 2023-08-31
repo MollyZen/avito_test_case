@@ -6,6 +6,13 @@ import (
 	"log"
 )
 
+// @title Denis Saltykov's Solution
+// @version 1.0
+// @description API Server for User Segmentation
+
+// @host localhost:8080
+// @BasePath /
+
 func main() {
 	// Configuration
 	cfg, err := config.New()

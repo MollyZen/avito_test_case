@@ -18,6 +18,7 @@ func NewRouter(l logger.Logger) *chi.Mux {
 	}
 
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RedirectSlashes)
 
 	return r
 }

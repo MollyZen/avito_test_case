@@ -8,6 +8,7 @@ const (
 	OpExpired
 	OpUpdated
 	OpSegDeleted
+	OpAddedRand
 )
 
 func OperationCodeToName(code OperationCode) string {

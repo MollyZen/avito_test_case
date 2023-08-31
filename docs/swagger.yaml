@@ -1,0 +1,226 @@
+basePath: /
+definitions:
+  avito_test_case_internal_dto.Segment:
+    properties:
+      percent:
+        maximum: 100
+        minimum: 0
+        type: number
+      slug:
+        minLength: 4
+        type: string
+      untilDate:
+        type: string
+    required:
+    - slug
+    type: object
+  avito_test_case_internal_dto.SegmentToAdd:
+    properties:
+      slug:
+        minLength: 4
+        type: string
+      untilDate:
+        type: string
+    required:
+    - slug
+    type: object
+  avito_test_case_internal_dto.SegmentToDelete:
+    properties:
+      slug:
+        minLength: 4
+        type: string
+    required:
+    - slug
+    type: object
+  avito_test_case_internal_dto.User:
+    properties:
+      userID:
+        example: "0"
+        minimum: 0
+        type: string
+    required:
+    - userID
+    type: object
+  avito_test_case_internal_dto.UserHistory:
+    properties:
+      records:
+        items:
+          $ref: '#/definitions/avito_test_case_internal_dto.UserHistoryRecord'
+        type: array
+    type: object
+  avito_test_case_internal_dto.UserHistoryGet:
+    properties:
+      month:
+        example: "0"
+        maximum: 12
+        minimum: 1
+        type: string
+      userID:
+        example: "0"
+        minimum: 0
+        type: string
+      year:
+        example: "0"
+        type: string
+    required:
+    - month
+    - userID
+    - year
+    type: object
+  avito_test_case_internal_dto.UserHistoryRecord:
+    properties:
+      operation:
+        type: string
+      segment:
+        type: string
+      timestamp:
+        example: ""
+        type: string
+      userID:
+        type: integer
+    type: object
+  avito_test_case_internal_dto.UserSegmentChange:
+    properties:
+      segmentAdd:
+        items:
+          $ref: '#/definitions/avito_test_case_internal_dto.SegmentToAdd'
+        type: array
+      segmentRemove:
+        items:
+          type: string
+        type: array
+      userID:
+        example: "0"
+        type: string
+    required:
+    - userID
+    type: object
+  avito_test_case_internal_dto.UserSegmentGet:
+    properties:
+      segmentAdd:
+        items:
+          $ref: '#/definitions/avito_test_case_internal_dto.SegmentToAdd'
+        type: array
+      userID:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for User Segmentation
+  title: Denis Saltykov's Solution
+  version: "1.0"
+paths:
+  /assignment:
+    put:
+      consumes:
+      - application/json
+      description: Remove and/or add segments to user. Deletes happen first. In case
+        of conflict with existing data new values overwrite old ones
+      operationId: change-assignment
+      parameters:
+      - description: User ID, slugs of segments to add (TTL is optional) and delete.
+          DateTime in RFC3339 format
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/avito_test_case_internal_dto.UserSegmentChange'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: ChangeAssignment
+      tags:
+      - assignment
+  /segment:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a segment. All existing assignments with this segment will
+        be deleted with it
+      operationId: delete-segment
+      parameters:
+      - description: Segment slug
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/avito_test_case_internal_dto.SegmentToDelete'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: DeleteSegment
+      tags:
+      - segment
+    put:
+      consumes:
+      - application/json
+      description: Creates new segment. If it already exists - sets active state to
+        true
+      operationId: create-segment
+      parameters:
+      - description: Segment slug with percent of people to assign this segment to
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/avito_test_case_internal_dto.Segment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: CreateNewSegment
+      tags:
+      - segment
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Returns current assignments of user
+      operationId: get-assignments
+      parameters:
+      - description: User ID
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/avito_test_case_internal_dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/avito_test_case_internal_dto.UserSegmentGet'
+      summary: GetAssignments
+      tags:
+      - user
+  /user/history:
+    get:
+      consumes:
+      - application/json
+      description: Returns all assignment action history for this user
+      operationId: get-history
+      parameters:
+      - description: User ID with year and month to get history of
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/avito_test_case_internal_dto.UserHistoryGet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/avito_test_case_internal_dto.UserHistory'
+      summary: GetHistory
+      tags:
+      - user
+swagger: "2.0"

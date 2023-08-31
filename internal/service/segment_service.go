@@ -2,12 +2,15 @@ package service
 
 import (
 	"avito_test_case/internal/datastruct"
+	"avito_test_case/internal/dto"
 	"avito_test_case/internal/misc"
 	"avito_test_case/internal/repository"
 	"avito_test_case/pkg/logger"
 	"context"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"time"
 )
 
 type SegmentService struct {
@@ -28,12 +31,46 @@ func NewPostgresSegmentService(db *pgxpool.Pool, segRep *repository.PostgresSegm
 	}
 }
 
-func (s *SegmentService) Create(ctx context.Context, seg datastruct.Segment) (datastruct.Segment, error) {
+func (s *SegmentService) Create(ctx context.Context, seg dto.Segment) (datastruct.Segment, error) {
 	var res datastruct.Segment
 	var err error
-	if res, err = s.segRep.Create(ctx, seg); err != nil {
+	var tr pgx.Tx
+	tr, err = s.db.BeginTx(context.TODO(), pgx.TxOptions{})
+	if res, err = s.segRep.CreateWithConn(ctx, datastruct.Segment{
+		Slug: seg.Slug,
+	}, tr.Conn()); err != nil {
+		_ = tr.Rollback(context.TODO())
 		return datastruct.Segment{}, err
 	}
+
+	if seg.Percent > 0. && seg.Percent <= 100. {
+		var tmp time.Time
+		var t pgtype.Timestamptz
+		if len(seg.UntilDate) > 0 {
+			tmp, _ = time.Parse(time.RFC3339, seg.UntilDate)
+			t = pgtype.Timestamptz{Time: tmp}
+		} else {
+			t = pgtype.Timestamptz{}
+		}
+		var as []datastruct.Assignment
+		//note: returns only user ids
+		as, err = s.segRep.AddToPercentOfUsersWithConn(context.TODO(), res.ID, seg.Percent, t, tr.Conn())
+		if err != nil {
+			_ = tr.Rollback(context.TODO())
+			return datastruct.Segment{}, err
+		}
+		for i, _ := range as {
+			as[i].SegmentID = res.ID
+			as[i].UntilDate = t
+		}
+		err = s.hisRep.CreateAllWithConn(context.TODO(), misc.AssignmentsToHistory(as, datastruct.OpAddedRand), tr.Conn())
+		if err != nil {
+			_ = tr.Rollback(context.TODO())
+			return datastruct.Segment{}, err
+		}
+	}
+
+	_ = tr.Commit(context.TODO())
 	return res, nil
 }
 

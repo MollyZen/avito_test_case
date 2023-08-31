@@ -27,10 +27,20 @@ func NewUserController(handler *chi.Mux, s *service.PostgresAssignmentService, l
 	})
 }
 
+// @Summary GetAssignments
+// @Tags user
+// @Description Returns current assignments of user
+// @ID get-assignments
+// @Accept json
+// @Produce json
+// @Param input body dto.User true "User ID"
+// @Success 200 {object} dto.UserSegmentGet
+// @Router /user [get]
 func (c *userController) getAssignments(w http.ResponseWriter, r *http.Request) {
 	var u dto.User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, http.StatusText(500), 500)
+		c.l.Warn(err)
 		return
 	}
 	if err := validator.New().Struct(u); err != nil {
@@ -45,13 +55,25 @@ func (c *userController) getAssignments(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(res); err != nil {
 		http.Error(w, http.StatusText(500), 500)
+		c.l.Warn(err)
+		return
 	}
 }
 
+// @Summary GetHistory
+// @Tags user
+// @Description Returns all assignment action history for this user
+// @ID get-history
+// @Accept json
+// @Produce json
+// @Param input body dto.UserHistoryGet true "User ID with year and month to get history of"
+// @Success 200 {object} dto.UserHistory
+// @Router /user/history [get]
 func (c *userController) getHistory(w http.ResponseWriter, r *http.Request) {
 	var u dto.UserHistoryGet
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		http.Error(w, http.StatusText(500), 500)
+		c.l.Warn(err)
 		return
 	}
 	if err := validator.New().Struct(u); err != nil {
@@ -71,6 +93,8 @@ func (c *userController) getHistory(w http.ResponseWriter, r *http.Request) {
 	for _, v := range res.Records {
 		if err := csvW.Write([]string{strconv.FormatInt(v.UserID, 10), v.Segment, v.Operation, v.Timestamp.Format(time.RFC3339)}); err != nil {
 			http.Error(w, http.StatusText(500), 500)
+			c.l.Warn(err)
+			return
 		}
 	}
 	csvW.Flush()
