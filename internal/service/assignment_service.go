@@ -120,7 +120,13 @@ func (uc PostgresAssignmentService) Assign(ctx context.Context, userID int64, se
 		alreadyExist[v.SegmentID] = v
 	}
 	for i, v := range segToAddT {
-		if _, ok := alreadyExist[v.ID]; ok {
+		formattedToAdd := segToAdd[i].UntilDate
+		if formattedToAdd == "" {
+			formattedToAdd = "null"
+		}
+		var formattedOld []byte
+		formattedOld, _ = alreadyExist[v.ID].UntilDate.MarshalJSON()
+		if _, ok := alreadyExist[v.ID]; ok && formattedToAdd != string(formattedOld) {
 			toUpdate = append(toUpdate, datastruct.Assignment{
 				UserID:    user.ID,
 				SegmentID: v.ID,
