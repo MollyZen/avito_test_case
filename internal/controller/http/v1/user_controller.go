@@ -103,6 +103,7 @@ func (c *userController) getHistory(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/csv")
 	csvW := csv.NewWriter(w)
+	defer csvW.Flush()
 	csvW.Comma = ';'
 	for _, v := range res.Records {
 		if err := csvW.Write([]string{strconv.FormatInt(v.UserID, 10), v.Segment, v.Operation, v.Timestamp.Format(time.RFC3339)}); err != nil {
@@ -111,5 +112,4 @@ func (c *userController) getHistory(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	csvW.Flush()
 }

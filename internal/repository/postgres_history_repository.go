@@ -46,6 +46,7 @@ func (p PostgresHistoryRepository) CreateAllWithConn(ctx context.Context, histor
 
 func (p PostgresHistoryRepository) CreateAll(ctx context.Context, history []datastruct.History) error {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return err
 	}

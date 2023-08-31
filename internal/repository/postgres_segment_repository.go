@@ -42,6 +42,7 @@ func (p PostgresSegmentRepository) UpsertWithConn(ctx context.Context, segment d
 
 func (p PostgresSegmentRepository) Upsert(ctx context.Context, segment datastruct.Segment) (datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return datastruct.Segment{}, err
 	}
@@ -63,6 +64,7 @@ func (p PostgresSegmentRepository) GetAllBySlugWithConn(ctx context.Context, slu
 
 func (p PostgresSegmentRepository) GetAllBySlug(ctx context.Context, slugs []string) ([]datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +86,7 @@ func (p PostgresSegmentRepository) GetAllByIdWithConn(ctx context.Context, ids [
 
 func (p PostgresSegmentRepository) GetAllById(ctx context.Context, ids []int64) ([]datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +109,7 @@ func (p PostgresSegmentRepository) DeleteByIdWithConn(ctx context.Context, segme
 
 func (p PostgresSegmentRepository) DeleteById(ctx context.Context, segmentId int64) (datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return datastruct.Segment{}, err
 	}
@@ -128,6 +132,7 @@ func (p PostgresSegmentRepository) DeleteBySlugWithConn(ctx context.Context, seg
 
 func (p PostgresSegmentRepository) DeleteBySlug(ctx context.Context, segmentSlug string) (datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return datastruct.Segment{}, err
 	}
@@ -158,6 +163,7 @@ func (p PostgresSegmentRepository) AddToPercentOfUsersWithConn(ctx context.Conte
 
 func (p PostgresSegmentRepository) AddToPercentOfUsers(ctx context.Context, segmentID int64, percent float64, untilDate pgtype.Timestamptz) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}

@@ -36,11 +36,12 @@ func (p PostgresUserRepository) GetWithConn(ctx context.Context, userID int64, c
 }
 
 func (p PostgresUserRepository) Get(ctx context.Context, userID int64) (datastruct.User, error) {
-	conn, err := p.db.Acquire(ctx)
+	conn, err := p.db.Acquire(context.TODO())
+	defer conn.Release()
 	if err != nil {
 		return datastruct.User{}, err
 	}
-	return p.GetWithConn(ctx, userID, conn.Conn())
+	return p.GetWithConn(context.TODO(), userID, conn.Conn())
 }
 
 func (p PostgresUserRepository) CreateWithConn(ctx context.Context, user datastruct.User, conn *pgx.Conn) (datastruct.User, error) {
@@ -62,6 +63,7 @@ func (p PostgresUserRepository) CreateWithConn(ctx context.Context, user datastr
 
 func (p PostgresUserRepository) Create(ctx context.Context, user datastruct.User) (datastruct.User, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return datastruct.User{}, err
 	}
@@ -91,6 +93,7 @@ func (p PostgresUserRepository) UpsertWithConn(ctx context.Context, user datastr
 
 func (p PostgresUserRepository) Upsert(ctx context.Context, user datastruct.User) (datastruct.User, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return datastruct.User{}, err
 	}

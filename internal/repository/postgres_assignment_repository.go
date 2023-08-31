@@ -47,6 +47,7 @@ func (p PostgresAssignmentRepository) CreateWithConn(ctx context.Context, assign
 
 func (p PostgresAssignmentRepository) Create(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +81,7 @@ func (p PostgresAssignmentRepository) UpdateWithConn(ctx context.Context, assign
 
 func (p PostgresAssignmentRepository) Update(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -107,6 +109,7 @@ func (p PostgresAssignmentRepository) DeleteWithConn(ctx context.Context, assign
 
 func (p PostgresAssignmentRepository) Delete(ctx context.Context, assignments []datastruct.Assignment) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +131,7 @@ func (p PostgresAssignmentRepository) DeleteAllForSegWithConn(ctx context.Contex
 
 func (p PostgresAssignmentRepository) DeleteAllForSeg(ctx context.Context, segmentID int64) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}
@@ -149,6 +153,7 @@ func (p PostgresAssignmentRepository) GetAllForUserWithConn(ctx context.Context,
 
 func (p PostgresAssignmentRepository) GetAllForUser(ctx context.Context, userID int64) ([]datastruct.Assignment, error) {
 	conn, err := p.db.Acquire(ctx)
+	defer conn.Release()
 	if err != nil {
 		return nil, err
 	}

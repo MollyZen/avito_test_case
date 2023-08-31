@@ -36,7 +36,6 @@ func (s *SegmentService) Create(ctx context.Context, seg dto.Segment) (datastruc
 	var err error
 	var tr pgx.Tx
 	tr, err = s.db.BeginTx(context.TODO(), pgx.TxOptions{})
-	defer tr.Conn().Close(context.TODO())
 	isactive := false
 	var tmp []datastruct.Segment
 	if tmp, err = s.segRep.GetAllBySlug(context.TODO(), []string{seg.Slug}); err != nil {
@@ -89,7 +88,6 @@ func (s *SegmentService) Delete(ctx context.Context, seg datastruct.Segment) (da
 	var tr pgx.Tx
 	var err error
 	tr, err = s.db.BeginTx(context.TODO(), pgx.TxOptions{})
-	defer tr.Conn().Close(context.TODO())
 
 	var delSeg datastruct.Segment
 	if delSeg, err = s.segRep.DeleteBySlugWithConn(ctx, seg.Slug, tr.Conn()); err != nil {

@@ -42,7 +42,6 @@ func (uc PostgresAssignmentService) Assign(ctx context.Context, userID int64, se
 	var tr pgx.Tx
 	var err error
 	tr, err = uc.db.BeginTx(context.TODO(), pgx.TxOptions{})
-	defer tr.Conn().Close(context.TODO())
 
 	//adding user if they don't exist
 	var user datastruct.User
@@ -201,12 +200,18 @@ func (uc PostgresAssignmentService) GetUserAssignments(ctx context.Context, user
 		return dto.UserSegmentGet{}, err
 	}
 
-	segIds := make([]int64, len(as))
-	for i, v := range as {
-		segIds[i] = v.SegmentID
+	segIds := make(map[int64]bool, len(as))
+	for _, v := range as {
+		segIds[v.SegmentID] = true
+	}
+	tmp := make([]int64, len(segIds))
+	iter := 0
+	for k, _ := range segIds {
+		tmp[iter] = k
+		iter++
 	}
 	var segs []datastruct.Segment
-	if segs, err = uc.segRep.GetAllById(context.TODO(), segIds); err != nil {
+	if segs, err = uc.segRep.GetAllById(context.TODO(), tmp); err != nil {
 		return dto.UserSegmentGet{}, err
 	}
 
