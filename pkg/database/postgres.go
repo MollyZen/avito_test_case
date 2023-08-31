@@ -35,7 +35,6 @@ func NewPostgres(cfg config.Postgres, l logger.Logger) *pgxpool.Pool {
 			LogLevel: dbLogLevel,
 		}
 	}
-
 	db, err = pgxpool.NewWithConfig(context.TODO(), poolCfg)
 	err = db.Ping(context.TODO())
 	if err != nil {

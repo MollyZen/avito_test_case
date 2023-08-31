@@ -8,16 +8,16 @@ CREATE TABLE segmenting.user (
 
 CREATE TABLE segmenting.segment (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR NOT NULL,
+    slug VARCHAR NOT NULL CHECK (slug ~ '^[a-zA-z0-9\-_]{4,}$'),
     isactive BOOL NOT NULL DEFAULT TRUE,
     creationdate TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE UNIQUE INDEX name_idx ON segmenting.segment (name);
+CREATE UNIQUE INDEX name_idx ON segmenting.segment (slug);
 
 CREATE TABLE segmenting.assignment (
     userid BIGSERIAL NOT NULL,
     segmentid BIGINT NOT NULL,
-    untildate TIMESTAMPTZ,
+    untildate TIMESTAMPTZ DEFAULT NULL,
     PRIMARY KEY (userid, segmentid),
     CONSTRAINT fk_assig_userid
         FOREIGN KEY(userid)
@@ -41,8 +41,9 @@ CREATE TABLE segmenting.operation (
 INSERT INTO segmenting.operation (id, name, description, creationdate, updatedate, isactive)
     VALUES (0, 'ADDED', 'Добавление', now(), now(), TRUE),
            (1, 'REMOVED', 'Удаление', now(), now(), TRUE),
-           (3, 'EXPIRED', 'Удаление по истечении времени', now(), now(), TRUE),
-           (4, 'UPDATED', 'Обновление значения', now(), now(), TRUE);
+           (2, 'EXPIRED', 'Удаление по истечении времени', now(), now(), TRUE),
+           (3, 'UPDATED', 'Обновление значения', now(), now(), TRUE),
+           (4, 'SEGMENT_DELETED', 'Удален вместе с сегментом', now(), now(), TRUE);
 
 CREATE TABLE segmenting.history (
     id BIGSERIAL PRIMARY KEY,

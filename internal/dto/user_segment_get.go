@@ -1,6 +1,6 @@
 package dto
 
-type SegmentGet struct {
-	UserID       int64    `json:"userID"`
-	SegmentAdded []string `json:"segments"`
+type UserSegmentGet struct {
+	UserID       int64          `json:"userID"`
+	SegmentAdded []SegmentToAdd `json:"segmentAdd"`
 }

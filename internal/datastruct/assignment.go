@@ -1,9 +1,11 @@
 package datastruct
 
-import "time"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Assignment struct {
-	UserID    int64
-	SegmentID int64
-	UntilDate time.Time
+	UserID    int64              `db:"userid"`
+	SegmentID int64              `db:"segmentid"`
+	UntilDate pgtype.Timestamptz `db:"untildate"`
 }

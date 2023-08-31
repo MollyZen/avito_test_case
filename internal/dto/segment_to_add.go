@@ -1,8 +1,10 @@
 package dto
 
-import "time"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type SegmentToAdd struct {
-	Name      string    `json:"name"`
-	UntilDate time.Time `json:"untilDate"`
+	Slug      string             `json:"slug" validate:"required"`
+	UntilDate pgtype.Timestamptz `json:"untilDate"`
 }

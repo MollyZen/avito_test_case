@@ -1,6 +1,6 @@
 package dto
 
 type Segment struct {
-	Name    string  `json:"name"`
-	Percent float64 `json:"percent"`
+	Slug    string  `json:"slug" validate:"required"`
+	Percent float64 `json:"percent" validate:"gte=0,lte=100"`
 }

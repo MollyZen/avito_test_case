@@ -2,10 +2,13 @@ package app
 
 import (
 	"avito_test_case/config"
+	"avito_test_case/internal/controller/http/v1"
 	"avito_test_case/internal/repository"
 	"avito_test_case/internal/service"
 	"avito_test_case/pkg/database"
+	"avito_test_case/pkg/httpserver"
 	"avito_test_case/pkg/logger"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,16 +26,32 @@ func Run(cfg *config.Config) {
 	hisRep := repository.NewPostgresHistoryRepository(db, l)
 
 	//services
-	service.NewAssignmentUseCase(usRep, segRep, asRep, hisRep, l)
+	asService := service.NewPostgresAssignmentService(db, usRep, segRep, asRep, hisRep, l)
+	segService := service.NewPostgresSegmentService(db, segRep, asRep, hisRep, l)
 
 	//http
+	mux := v1.NewRouter(l)
+	v1.NewSegmentController(mux, segService, l)
+	v1.NewAssignmentController(mux, asService, l)
+	v1.NewUserController(mux, asService, l)
+	httpServer := httpserver.New(mux, cfg.HTTP)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
+	l.Info("The app is running")
+
 	select {
 	case s := <-interrupt:
 		l.Info("main - Run - signal: " + s.String())
+	case err := <-httpServer.Notify():
+		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+	}
+
+	// Shutdown
+
+	if err := httpServer.Shutdown(); err != nil {
+		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
 }

@@ -22,26 +22,27 @@ type (
 
 	// HTTP -.
 	HTTP struct {
-		Port int `yaml:"port" env:"TC_APP_VERSION" validate:"gt=0" env-default:"80"`
+		Port     int    `yaml:"port" env:"TC_HTTP_PORT" validate:"gt=0" env-default:"8080"`
+		LogLevel string `yaml:"logLevel" env:"TC_HTTP_LOG_LEVEL" env-default:"INFO"`
 	}
 
 	// Log -.
 	Log struct {
-		Level string `yaml:"level" env:"TC_LOG_LEVEL" env-default:"WARN"`
+		Level string `yaml:"level" env:"TC_LOG_LEVEL" env-default:"DEBUG"`
 	}
 
 	// Postgres -.
 	Postgres struct {
 		Host              string `yaml:"host" env:"TC_PG_HOST" env-default:"localhost" validate:"required"`
-		Port              int32  `yaml:"port" env:"TC_PG_PORT" env-default:"5432" validate:"required"`
+		Port              int32  `yaml:"port" env:"TC_PG_PORT" env-default:"8001" validate:"gt=0,required"`
 		User              string `yaml:"user" env:"TC_PG_USER" env-default:"postgres" validate:"required"`
-		Password          string `yaml:"password" env:"TC_PG_PASSWORD" env-default:"postgres" validate:"required"`
+		Password          string `yaml:"password" env:"TC_PG_PASSWORD" env-default:"laputanmachine" validate:"required"`
 		DB                string `yaml:"db" env:"TC_PG_DB" env-default:"avito_test_case" validate:"required"`
 		PoolMaxOpen       int32  `yaml:"poolMaxOpen" env:"TC_PG_POOL_MAX_OPEN" env-default:"10" validate:"required"`
 		PoolMaxIdle       int32  `yaml:"poolMaxIdle" env:"TC_PG_POOL_MAX_IDLE" env-default:"10" validate:"required"`
-		PoolMaxLifetime   int32  `yaml:"poolMaxLifetime" env:"TC_PG_POOL_MAX_LIFETIME" env-default:"3" validate:"required"`
-		ReconnectAttempts int32  `yaml:"reconnectAttempts" env:"TC_PG_RECONNECT_ATTEMPTS"`
-		LogLevel          string `yaml:"logLevel" env:"TC_PG_LOG_LEVEL" env-default:"NONE" validate:"required"`
+		PoolMaxLifetime   int32  `yaml:"poolMaxLifetime" env:"TC_PG_POOL_MAX_LIFETIME" env-default:"600" validate:"required"`
+		ReconnectAttempts int32  `yaml:"reconnectAttempts" env:"TC_PG_RECONNECT_ATTEMPTS" env-default:"3"`
+		LogLevel          string `yaml:"logLevel" env:"TC_PG_LOG_LEVEL" env-default:"INFO" validate:"required"`
 	}
 )
 
