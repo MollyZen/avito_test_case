@@ -32,7 +32,7 @@ func NewSegmentController(handler *chi.Mux, s *service.SegmentService, l logger.
 // @ID create-segment
 // @Accept json
 // @Produce json
-// @Param input body dto.Segment true "Segment slug with percent of people to assign this segment to"
+// @Param input body dto.Segment true "Segment slug with percent of people to assign this segment to. DateTime in RFC3339 format"
 // @Success 200
 // @Router /segment [put]
 func (s *segmentController) Create(w http.ResponseWriter, r *http.Request) {

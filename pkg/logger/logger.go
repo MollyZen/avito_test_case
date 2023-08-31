@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// Logger -.
 type Logger interface {
 	Debug(message interface{}, args ...interface{})
 	Info(message interface{}, args ...interface{})
@@ -17,12 +16,10 @@ type Logger interface {
 	Fatal(message interface{}, args ...interface{})
 }
 
-// ZeroLogLogger -.
 type ZeroLogLogger struct {
 	L *zerolog.Logger
 }
 
-// New -.
 func NewZeroLog(level string) Logger {
 	var l zerolog.Level
 
@@ -73,31 +70,26 @@ func (l *ZeroLogLogger) formatMessage(message interface{}) string {
 	}
 }
 
-// Debug -.
 func (l *ZeroLogLogger) Debug(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
 	l.log(l.L.Debug(), mf, args...)
 }
 
-// Info -.
 func (l *ZeroLogLogger) Info(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
 	l.log(l.L.Info(), mf, args...)
 }
 
-// Warn -.
 func (l *ZeroLogLogger) Warn(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
 	l.log(l.L.Warn(), mf, args...)
 }
 
-// Error -.
 func (l *ZeroLogLogger) Error(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
 	l.log(l.L.Error(), mf, args...)
 }
 
-// Fatal -.
 func (l *ZeroLogLogger) Fatal(message interface{}, args ...interface{}) {
 	mf := l.formatMessage(message)
 	l.log(l.L.Fatal(), mf, args...)

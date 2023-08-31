@@ -154,3 +154,14 @@ func (p PostgresAssignmentRepository) GetAllForUser(ctx context.Context, userID 
 	}
 	return p.GetAllForUserWithConn(ctx, userID, conn.Conn())
 }
+
+func (p PostgresAssignmentRepository) DeleteExpired(ctx context.Context) error {
+	q := `
+		DELETE FROM segmenting.assignment
+		WHERE untildate < now()
+		`
+	if _, err := p.db.Exec(context.TODO(), q); err != nil {
+		return err
+	}
+	return nil
+}

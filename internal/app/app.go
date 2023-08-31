@@ -9,12 +9,14 @@ import (
 	"avito_test_case/pkg/database"
 	"avito_test_case/pkg/httpserver"
 	"avito_test_case/pkg/logger"
+	"context"
 	"fmt"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func Run(cfg *config.Config) {
@@ -43,6 +45,19 @@ func Run(cfg *config.Config) {
 	})
 	httpServer := httpserver.New(mux, cfg.HTTP)
 
+	//delete expired assignments every hour
+	ticker := time.NewTicker(time.Duration(cfg.App.AssignmentCleaningInterval) * time.Second)
+	cleaner := make(chan interface{})
+	go func() {
+		for range ticker.C {
+			l.Info("Cleaning expired assignments...")
+			err := asRep.DeleteExpired(context.TODO())
+			if err != nil {
+				cleaner <- err
+			}
+		}
+	}()
+
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -54,6 +69,8 @@ func Run(cfg *config.Config) {
 		l.Info("main - Run - signal: " + s.String())
 	case err := <-httpServer.Notify():
 		l.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+	case err := <-cleaner:
+		l.Error(fmt.Errorf("app - Run - Cleaner: %w", err))
 	}
 
 	// Shutdown
@@ -61,4 +78,5 @@ func Run(cfg *config.Config) {
 	if err := httpServer.Shutdown(); err != nil {
 		l.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
+	ticker.Stop()
 }

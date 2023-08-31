@@ -58,6 +58,7 @@ func (p PostgresHistoryRepository) GetAllForUserPeriod(ctx context.Context, user
 		WHERE userid = $1
 		AND timestamp >= $2
 		AND timestamp < $3	
+		ORDER BY timestamp ASC
 		`
 	var res []datastruct.History
 	if err := pgxscan.Select(ctx, p.db, &res, q, userID, start, end); err != nil {

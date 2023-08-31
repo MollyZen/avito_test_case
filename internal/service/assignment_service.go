@@ -3,6 +3,7 @@ package service
 import (
 	"avito_test_case/internal/datastruct"
 	"avito_test_case/internal/dto"
+	"avito_test_case/internal/errors"
 	"avito_test_case/internal/misc"
 	"avito_test_case/internal/repository"
 	"avito_test_case/pkg/logger"
@@ -185,7 +186,7 @@ func (uc PostgresAssignmentService) Assign(ctx context.Context, userID int64, se
 func (uc PostgresAssignmentService) GetUserAssignments(ctx context.Context, userID int64) (dto.UserSegmentGet, error) {
 	var err error
 	if _, err = uc.userRep.Get(context.TODO(), userID); err != nil {
-		return dto.UserSegmentGet{}, err
+		return dto.UserSegmentGet{}, &errors.NoSuchUserError{UserID: userID}
 	}
 
 	var as []datastruct.Assignment

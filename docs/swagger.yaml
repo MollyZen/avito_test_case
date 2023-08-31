@@ -1,11 +1,17 @@
 basePath: /
 definitions:
+  avito_test_case_internal_dto.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
   avito_test_case_internal_dto.Segment:
     properties:
       percent:
+        example: "0"
         maximum: 100
         minimum: 0
-        type: number
+        type: string
       slug:
         minLength: 4
         type: string
@@ -163,7 +169,8 @@ paths:
         true
       operationId: create-segment
       parameters:
-      - description: Segment slug with percent of people to assign this segment to
+      - description: Segment slug with percent of people to assign this segment to.
+          DateTime in RFC3339 format
         in: body
         name: input
         required: true
@@ -197,6 +204,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/avito_test_case_internal_dto.UserSegmentGet'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/avito_test_case_internal_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
       summary: GetAssignments
       tags:
       - user
@@ -220,6 +233,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/avito_test_case_internal_dto.UserHistory'
+        "500":
+          description: Internal Server Error
       summary: GetHistory
       tags:
       - user

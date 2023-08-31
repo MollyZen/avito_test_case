@@ -36,19 +36,30 @@ func (s *SegmentService) Create(ctx context.Context, seg dto.Segment) (datastruc
 	var err error
 	var tr pgx.Tx
 	tr, err = s.db.BeginTx(context.TODO(), pgx.TxOptions{})
-	if res, err = s.segRep.CreateWithConn(ctx, datastruct.Segment{
+
+	isactive := false
+	var tmp []datastruct.Segment
+	if tmp, err = s.segRep.GetAllBySlug(context.TODO(), []string{seg.Slug}); err != nil {
+		return datastruct.Segment{}, err
+	}
+	if len(tmp) > 0 {
+		isactive = tmp[0].IsActive
+	}
+
+	if res, err = s.segRep.UpsertWithConn(ctx, datastruct.Segment{
 		Slug: seg.Slug,
 	}, tr.Conn()); err != nil {
 		_ = tr.Rollback(context.TODO())
 		return datastruct.Segment{}, err
 	}
 
-	if seg.Percent > 0. && seg.Percent <= 100. {
+	if seg.Percent > 0. && seg.Percent <= 100. && !isactive {
 		var tmp time.Time
 		var t pgtype.Timestamptz
 		if len(seg.UntilDate) > 0 {
 			tmp, _ = time.Parse(time.RFC3339, seg.UntilDate)
 			t = pgtype.Timestamptz{Time: tmp}
+			t.Valid = true
 		} else {
 			t = pgtype.Timestamptz{}
 		}

@@ -63,7 +63,7 @@ const docTemplate = `{
                 "operationId": "create-segment",
                 "parameters": [
                     {
-                        "description": "Segment slug with percent of people to assign this segment to",
+                        "description": "Segment slug with percent of people to assign this segment to. DateTime in RFC3339 format",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -140,6 +140,15 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/avito_test_case_internal_dto.UserSegmentGet"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/avito_test_case_internal_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -175,12 +184,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/avito_test_case_internal_dto.UserHistory"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
         }
     },
     "definitions": {
+        "avito_test_case_internal_dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "avito_test_case_internal_dto.Segment": {
             "type": "object",
             "required": [
@@ -188,9 +208,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "percent": {
-                    "type": "number",
+                    "type": "string",
                     "maximum": 100,
-                    "minimum": 0
+                    "minimum": 0,
+                    "example": "0"
                 },
                 "slug": {
                     "type": "string",

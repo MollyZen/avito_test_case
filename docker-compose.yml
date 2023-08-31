@@ -3,12 +3,11 @@ services:
   db:
     image: postgres:latest
     volumes:
-     - data:/var/lib/postgresql/data
-    restart: always
+     - saltykov_test_case:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: "avito_test_case"
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "laputanmachine"
+      POSTGRES_PASSWORD: "postgres"
     ports:
       - "8001:5432"
   app:
@@ -17,15 +16,14 @@ services:
       context: .
     environment:
       TC_PG_HOST: "db"
+      TC_PG_PORT: "5432"
       TC_OG_USER: "postgres"
-      TC_PG_PASSWORD: "laputanmachine"
+      TC_PG_PASSWORD: "postgres"
     depends_on:
       - db
-      #command:
-      # - "DB_HOST $${DB_HOST}"
-    #  ports:
-    #   - "3000:3000"
+    ports:
+      - "8080:8080"
 
 
 volumes:
-  data:
+  saltykov_test_case:

@@ -1,19 +1,21 @@
 app:
-  name : 'solution_saltykov'
+  name : 'AVITO_TEST_CASE_SALTYKOV'
+  AssignmentCleaningInterval : '3600'
 
 http:
   port : '8080'
 
 log:
-  level : 'debug'
+  level : 'INFO'
 
 postgres:
   host : 'localhost'
-  port : '5432'
+  port : '8001'
   user : 'database'
-  password : 'laputanmachine'
+  password : 'postgres'
   db : 'avito_test_case'
   poolMaxOpen : '10'
   poolMaxIdle : '10'
-  poolMaxLifeTime : '300'
+  poolMaxLifeTime : '600'
   reconnectAttempts : '3'
+  LogLevel : 'WARN'

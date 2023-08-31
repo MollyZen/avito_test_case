@@ -24,6 +24,8 @@ func OperationCodeToName(code OperationCode) string {
 		res = "Обновление значения"
 	case OpSegDeleted:
 		res = "Удален вместе с сегментом"
+	case OpAddedRand:
+		res = "Добавлен случайным образом при создании сегмента"
 	}
 	return res
 }

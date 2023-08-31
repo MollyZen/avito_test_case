@@ -22,7 +22,7 @@ func NewPostgresSegmentRepository(db *pgxpool.Pool, logger logger.Logger) *Postg
 	}
 }
 
-func (p PostgresSegmentRepository) CreateWithConn(ctx context.Context, segment datastruct.Segment, conn *pgx.Conn) (datastruct.Segment, error) {
+func (p PostgresSegmentRepository) UpsertWithConn(ctx context.Context, segment datastruct.Segment, conn *pgx.Conn) (datastruct.Segment, error) {
 	q := `
 		INSERT INTO segmenting.segment
 			(slug, creationdate)
@@ -40,12 +40,12 @@ func (p PostgresSegmentRepository) CreateWithConn(ctx context.Context, segment d
 	return res, nil
 }
 
-func (p PostgresSegmentRepository) Create(ctx context.Context, segment datastruct.Segment) (datastruct.Segment, error) {
+func (p PostgresSegmentRepository) Upsert(ctx context.Context, segment datastruct.Segment) (datastruct.Segment, error) {
 	conn, err := p.db.Acquire(ctx)
 	if err != nil {
 		return datastruct.Segment{}, err
 	}
-	return p.CreateWithConn(ctx, segment, conn.Conn())
+	return p.UpsertWithConn(ctx, segment, conn.Conn())
 }
 
 func (p PostgresSegmentRepository) GetAllBySlugWithConn(ctx context.Context, slugs []string, conn *pgx.Conn) ([]datastruct.Segment, error) {
@@ -143,9 +143,14 @@ func (p PostgresSegmentRepository) AddToPercentOfUsersWithConn(ctx context.Conte
 		SELECT userid, segmentid, untildate FROM ljoin
 		RETURNING userid
 	`
-	var res []datastruct.Assignment
-	if err := pgxscan.Select(ctx, conn, &res, q, percent, segmentID, untilDate); err != nil {
+	var ids []int64
+	if err := pgxscan.Select(ctx, conn, &ids, q, percent, segmentID, untilDate); err != nil {
 		return nil, err
+	}
+
+	res := make([]datastruct.Assignment, len(ids))
+	for i, v := range ids {
+		res[i].UserID = v
 	}
 
 	return res, nil
