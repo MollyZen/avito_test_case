@@ -42,6 +42,7 @@ func (uc PostgresAssignmentService) Assign(ctx context.Context, userID int64, se
 	var tr pgx.Tx
 	var err error
 	tr, err = uc.db.BeginTx(context.TODO(), pgx.TxOptions{})
+	defer tr.Conn().Close(context.TODO())
 
 	//adding user if they don't exist
 	var user datastruct.User
